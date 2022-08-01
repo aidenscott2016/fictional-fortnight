@@ -6,10 +6,19 @@ import io.circe.literal._
 import org.http4s.circe._
 import org.http4s.dsl.io._
 import org.http4s.ember.server._
-import org.http4s.{HttpRoutes, QueryParamDecoder}
+import org.http4s.{HttpRoutes, QueryParamDecoder, Request, Response}
+import org.reactormonk.{CryptoBits, PrivateKey}
+import org.http4s.headers.Cookie
+import cats._
+import cats.effect._
+import cats.implicits._
+import cats.data._
 
+import scala.util.Random
+import scala.io.Codec
 
 object Main extends IOApp {
+
   case class Weight(weight: Double);
 
   case class User(id: String, name: String);
@@ -26,7 +35,8 @@ object Main extends IOApp {
 
   object WeightQueryParamMatcher extends QueryParamDecoderMatcher[Weight]("weight")
 
-  val helloWorldService = HttpRoutes.of[IO] {
+  val helloWorldService: Kleisli[IO, Request[IO], Response[IO]] = HttpRoutes.of[IO] {
+    case req @ POST -> Root / "hello" => ???
     case GET -> Root / "hello" / name =>
       Ok(s"Hello, $name.")
     case GET -> Root / "record" / User(user) :? WeightQueryParamMatcher(weight) =>
@@ -44,8 +54,6 @@ object Main extends IOApp {
       .use(_ => IO.never)
       .as(ExitCode.Success)
 }
-
-
 // idea:
 // a form which logs a weight against a time and date.
 // persistence
