@@ -1,21 +1,16 @@
 package uk.co.oldstreetjournal.quickstart
 
+import cats.data._
 import cats.effect._
 import com.comcast.ip4s._
 import io.circe.literal._
+import io.circe.generic.auto._
+import io.circe.syntax._
 import org.http4s.circe._
 import org.http4s.dsl.io._
 import org.http4s.ember.server._
-import org.http4s.{HttpRoutes, QueryParamDecoder, Request, Response}
-import org.reactormonk.{CryptoBits, PrivateKey}
-import org.http4s.headers.Cookie
-import cats._
-import cats.effect._
-import cats.implicits._
-import cats.data._
+import org.http4s.{EntityDecoder, HttpRoutes, QueryParamDecoder, Request, Response}
 
-import scala.util.Random
-import scala.io.Codec
 
 object Main extends IOApp {
 
@@ -25,6 +20,8 @@ object Main extends IOApp {
 
   implicit val weightQueryParamDecode: QueryParamDecoder[Weight] =
     QueryParamDecoder[Double].map(Weight)
+
+  implicit val weightJsonDecode: EntityDecoder[IO, Weight] = jsonOf[IO, Weight]
 
   object User {
     def unapply(id: String): Option[User] = id match {
@@ -36,11 +33,17 @@ object Main extends IOApp {
   object WeightQueryParamMatcher extends QueryParamDecoderMatcher[Weight]("weight")
 
   val helloWorldService: Kleisli[IO, Request[IO], Response[IO]] = HttpRoutes.of[IO] {
-    case req @ POST -> Root / "hello" => ???
-    case GET -> Root / "hello" / name =>
-      Ok(s"Hello, $name.")
     case GET -> Root / "record" / User(user) :? WeightQueryParamMatcher(weight) =>
       Ok(json"""{"id": ${user.id}, "name": ${user.name}, "weight": ${weight.weight}}""")
+    case POST -> Root / "record" / User(_) => {
+      throw new Exception("aha")
+    /*  for {
+      weight <- req.as[Weight]
+      _ = println(weight)
+      res <- Ok(weight.asJson)
+    } yield {
+      res
+    }*/}
 
   }.orNotFound
 
@@ -51,8 +54,12 @@ object Main extends IOApp {
       .withPort(port"8080")
       .withHttpApp(helloWorldService)
       .build
-      .use(_ => IO.never)
-      .as(ExitCode.Success)
+      .use(x => {
+        println(x)
+        IO.never
+      }).
+      as(ExitCode.Success) 
+
 }
 // idea:
 // a form which logs a weight against a time and date.
