@@ -9,6 +9,7 @@ import io.circe.syntax._
 import org.http4s.circe._
 import org.http4s.dsl.io._
 import org.http4s.ember.server._
+import org.http4s.server.middleware.Logger
 import org.http4s.{EntityDecoder, HttpRoutes, QueryParamDecoder, Request, Response}
 
 
@@ -35,15 +36,16 @@ object Main extends IOApp {
   val helloWorldService: Kleisli[IO, Request[IO], Response[IO]] = HttpRoutes.of[IO] {
     case GET -> Root / "record" / User(user) :? WeightQueryParamMatcher(weight) =>
       Ok(json"""{"id": ${user.id}, "name": ${user.name}, "weight": ${weight.weight}}""")
-    case POST -> Root / "record" / User(_) => {
+    case req @ POST -> Root / "record" / User(_) => {
       throw new Exception("aha")
-    /*  for {
+      throw new Exception("aha")
+      for {
       weight <- req.as[Weight]
       _ = println(weight)
       res <- Ok(weight.asJson)
     } yield {
       res
-    }*/}
+    }}
 
   }.orNotFound
 
@@ -52,7 +54,7 @@ object Main extends IOApp {
       .default[IO]
       .withHost(ipv4"0.0.0.0")
       .withPort(port"8080")
-      .withHttpApp(helloWorldService)
+      .withHttpApp(Logger.httpApp(true,true)(helloWorldService))
       .build
       .use(x => {
         println(x)
