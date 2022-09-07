@@ -37,8 +37,6 @@ object Main extends IOApp {
     case GET -> Root / "record" / User(user) :? WeightQueryParamMatcher(weight) =>
       Ok(json"""{"id": ${user.id}, "name": ${user.name}, "weight": ${weight.weight}}""")
     case req @ POST -> Root / "record" / User(_) => {
-      throw new Exception("aha")
-      throw new Exception("aha")
       for {
       weight <- req.as[Weight]
       _ = println(weight)
@@ -54,20 +52,11 @@ object Main extends IOApp {
       .default[IO]
       .withHost(ipv4"0.0.0.0")
       .withPort(port"8080")
-      .withHttpApp(Logger.httpApp(true,true)(helloWorldService))
+      .withHttpApp(Logger.httpApp(logHeaders = true,logBody = true)(helloWorldService))
       .build
       .use(x => {
-        println(x)
         IO.never
       }).
       as(ExitCode.Success) 
 
 }
-// idea:
-// a form which logs a weight against a time and date.
-// persistence
-// authentication
-// some tests
-
-//future:
-// extrcat text from an image

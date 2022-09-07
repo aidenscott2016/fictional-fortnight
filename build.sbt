@@ -1,8 +1,11 @@
 val Http4sVersion = "0.23.14"
+val DoobieVersion = "1.0.0-RC2"
 val CirceVersion = "0.14.2"
 val MunitVersion = "0.7.29"
 val LogbackVersion = "1.2.11"
 val MunitCatsEffectVersion = "1.0.7"
+val PureConfigVersion = "0.17.1"
+val FlywayVersion = "9.2.0"
 
 lazy val root = (project in file("."))
   .settings(
@@ -22,8 +25,14 @@ lazy val root = (project in file("."))
       "org.scalameta" %% "svm-subs" % "20.2.0",
       "io.circe" %% "circe-literal" % "0.14.2",
       "org.reactormonk" %% "cryptobits" % "1.3",
-    ),
-    addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.full),
+      "org.tpolecat"          %% "doobie-core"          % DoobieVersion,
+      "org.tpolecat"          %% "doobie-h2"            % DoobieVersion,
+      "org.tpolecat"          %% "doobie-hikari"        % DoobieVersion,
+      "com.github.pureconfig" %% "pureconfig" % PureConfigVersion,
+      "com.github.pureconfig" %% "pureconfig-cats-effect" % PureConfigVersion,
+      "org.flywaydb"          %  "flyway-core"          % FlywayVersion,
+),
+addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.13.2" cross CrossVersion.full),
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
     testFrameworks += new TestFramework("munit.Framework")
   )
